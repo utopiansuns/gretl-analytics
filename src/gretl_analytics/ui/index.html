@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аналитика для Gretl</title>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/paper.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-head pywebview-drag-region"></div>
+
+  <div class="segmented segmented-wide" role="tablist" aria-label="Панель">
+    <button role="tab" id="tab-input" aria-selected="true" aria-controls="panel-input">Вывод Gretl</button>
+    <button role="tab" id="tab-glossary" aria-selected="false" aria-controls="panel-glossary">
+      Словарь <span class="badge" id="gl-count"></span></button>
+  </div>
+
+  <section class="panel" id="panel-input" role="tabpanel" aria-labelledby="tab-input">
+    <div class="row">
+      <button class="pill" id="paste">Вставить</button>
+      <button class="pill" id="append" title="Дописать фрагмент из буфера обмена в конец">Добавить</button>
+      <span class="spacer"></span>
+      <button class="pill pill-plain" id="erase">Очистить</button>
+    </div>
+    <textarea id="text" class="field printout" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Вывод Gretl"
+      placeholder="Вставьте вывод Gretl: модель, тесты, описательную статистику, прогноз. Можно весь текст задания из Word, пояснения не помешают."></textarea>
+    <p class="detected" id="detected" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="panel-glossary" role="tabpanel" aria-labelledby="tab-glossary" hidden>
+    <p class="caption">Переменные из вставки появляются здесь сами, названия и единицы подбираются по словарю наборов Gretl. Исправьте, если нужно: пишите в именительном падеже, остальные падежи подставятся сами.</p>
+    <div class="row">
+      <span class="spacer"></span>
+      <button class="pill pill-plain" id="add-row">Добавить</button>
+    </div>
+    <div class="glossary" id="glossary"></div>
+    <p class="caption" id="gl-note" aria-live="polite"></p>
+    <p class="caption">Для фиктивной переменной напишите в единицах 0/1, и текст будет звучать как «при наличии бассейна… чем при отсутствии».</p>
+  </section>
+
+  <footer class="sidebar-foot">
+    <div class="segmented segmented-wide segmented-small" role="radiogroup" aria-label="Оформление">
+      <button role="radio" data-theme-choice="auto" aria-checked="true">Авто</button>
+      <button role="radio" data-theme-choice="light" aria-checked="false">Светлая</button>
+      <button role="radio" data-theme-choice="dark" aria-checked="false">Тёмная</button>
+    </div>
+    <p class="status" id="status" aria-live="polite">Все расчёты выполняются на этом компьютере.</p>
+  </footer>
+</aside>
+
+<main class="main">
+  <header class="toolbar pywebview-drag-region">
+    <input id="title" class="title-field" type="text" spellcheck="false" autocorrect="off" aria-label="Название отчёта" placeholder="Название отчёта">
+    <span class="spacer pywebview-drag-region"></span>
+    <div class="segmented" role="radiogroup" aria-label="Объём текста">
+      <button role="radio" id="mode-full" aria-checked="true">Подробно</button>
+      <button role="radio" id="mode-brief" aria-checked="false">Кратко</button>
+    </div>
+    <div class="pill-group" id="doc-actions" hidden>
+      <button id="copy-all" title="Скопировать отчёт с оформлением">Копировать</button>
+      <button id="save-word" title="Сохранить отчёт в Word и открыть">Сохранить в Word</button>
+    </div>
+    <button class="pill pill-accent" id="run">Сформировать <kbd id="run-kbd"></kbd></button>
+  </header>
+
+  <div class="desk" id="desk">
+    <article class="paper" id="paper">
+      <div class="empty">
+        <h1>Отчёт появится здесь</h1>
+        <ol class="steps">
+          <li><b>Скопируйте вывод Gretl.</b> В окне модели: Правка → Копировать. Подойдёт и текст задания из Word.</li>
+          <li><b>Вставьте его в панель слева.</b> Модели, тесты и прогноз найдутся сами.</li>
+          <li><b>Проверьте словарь.</b> Русские названия переменных будут склоняться в тексте.</li>
+          <li><b>Нажмите «Сформировать»</b> и сохраните отчёт в Word.</li>
+        </ol>
+      </div>
+    </article>
+    <nav class="outline" id="outline" aria-label="Разделы отчёта"></nav>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/util.js"></script>
+<script src="js/bridge.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/glossary.js"></script>
+<script src="js/report.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

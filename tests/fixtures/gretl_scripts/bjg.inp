@@ -1,0 +1,9 @@
+open bjg.gdt
+genr time
+series lg = log(g)
+genr dummy
+ols lg const time dm2 dm3 dm4 dm5 dm6 dm7 dm8 dm9 dm10 dm11 dm12
+modtest --breusch-pagan
+reset
+adf 12 lg --c --ct
+kpss 12 lg

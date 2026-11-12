@@ -1,0 +1,6 @@
+# Единые окончания строк для всех систем; бинарные файлы не трогаются
+* text=auto eol=lf
+*.png  binary
+*.icns binary
+*.ico  binary
+*.dmg  binary

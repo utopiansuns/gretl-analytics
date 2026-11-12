@@ -1,0 +1,2 @@
+open greene19_1.gdt
+logit GRADE const GPA TUCE PSI

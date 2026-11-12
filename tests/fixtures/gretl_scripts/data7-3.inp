@@ -1,0 +1,7 @@
+open data7-3.gdt
+corr price sqft bedrms baths
+ols price const sqft bedrms baths pool famroom firepl
+vif
+modtest --white
+omit bedrms baths famroom firepl
+modtest --normality

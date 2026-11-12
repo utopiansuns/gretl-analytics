@@ -1,0 +1,63 @@
+
+
+Model 1: OLS, using observations 1962-1994 (T = 33)
+Dependent variable: pop
+
+             coefficient   std. error    t-ratio   p-value 
+  ---------------------------------------------------------
+  const      -185.359      14.3429       -12.92    5.07e-14 ***
+  year          0.122108    0.00725115    16.84    3.76e-17 ***
+
+Mean dependent var   56.16991   S.D. dependent var   1.243588
+Sum squared resid    4.876822   S.E. of regression   0.396632
+R-squared            0.901455   Adjusted R-squared   0.898276
+F(1, 31)             283.5776   P-value(F)           3.76e-17
+Log-likelihood      -15.27674   Akaike criterion     34.55349
+Schwarz criterion    37.54650   Hannan-Quinn         35.56055
+rho                  0.869141   Durbin-Watson        0.097727
+
+
+Augmented regression for Chow test
+OLS, using observations 1962-1994 (T = 33)
+Dependent variable: pop
+
+             coefficient   std. error   t-ratio   p-value 
+  --------------------------------------------------------
+  const      -498.660      46.7123      -10.68    1.47e-11 ***
+  year          0.281391    0.0237479    11.85    1.23e-12 ***
+  splitdum    348.921      49.5748        7.038   9.67e-08 ***
+  sd_year      -0.177244    0.0251798    -7.039   9.65e-08 ***
+
+Mean dependent var   56.16991   S.D. dependent var   1.243588
+Sum squared resid    1.799047   S.E. of regression   0.249071
+R-squared            0.963647   Adjusted R-squared   0.959886
+F(3, 29)             256.2448   P-value(F)           5.81e-21
+Log-likelihood       1.177657   Akaike criterion     5.644686
+Schwarz criterion    11.63072   Hannan-Quinn         7.658803
+rho                  0.869854   Durbin-Watson        0.338586
+
+Chow test for structural break at observation 1973
+  F(2, 29) = 24.8063 with p-value 0.0000
+
+
+Breusch-Godfrey test for first-order autocorrelation
+OLS, using observations 1962-1994 (T = 33)
+Dependent variable: uhat
+
+             coefficient   std. error   t-ratio   p-value 
+  --------------------------------------------------------
+  const      -2.64873      7.36148      -0.3598   0.7215  
+  year        0.00134271   0.00372165    0.3608   0.7208  
+  uhat_1      0.870836     0.0929079     9.373    2.02e-10 ***
+
+  Unadjusted R-squared = 0.745450
+
+Test statistic: LMF = 87.855063,
+with p-value = P(F(1,30) > 87.8551) = 2.02e-10
+
+Alternative statistic: TR^2 = 24.599852,
+with p-value = P(Chi-square(1) > 24.5999) = 7.06e-07
+
+Ljung-Box Q' = 26.4482,
+with p-value = P(Chi-square(1) > 26.4482) = 2.71e-07
+

@@ -1,0 +1,65 @@
+
+
+                 Mean         Median        Minimum        Maximum
+price          317.49         291.50         199.90         505.00
+sqft           1910.9         1835.0         1065.0         3000.0
+
+            Std. Dev.           C.V.       Skewness   Ex. kurtosis
+price          88.498        0.27874        0.65346       -0.52983
+sqft           577.76        0.30234        0.48526       -0.67212
+
+             IQ range   Missing obs.
+price          154.50              0
+sqft           832.75              0
+
+
+Model 1: OLS, using observations 1-14
+Dependent variable: price
+
+             coefficient   std. error   t-ratio   p-value 
+  --------------------------------------------------------
+  const       52.3509      37.2855       1.404    0.1857  
+  sqft         0.138750     0.0187329    7.407    8.20e-06 ***
+
+Mean dependent var   317.4929   S.D. dependent var   88.49816
+Sum squared resid    18273.57   S.E. of regression   39.02304
+R-squared            0.820522   Adjusted R-squared   0.805565
+F(1, 12)             54.86051   P-value(F)           8.20e-06
+Log-likelihood      -70.08421   Akaike criterion     144.1684
+Schwarz criterion    145.4465   Hannan-Quinn         144.0501
+
+Dataset extended by 1 observations
+Modified series sqft (ID 2)
+
+ For 95% confidence intervals, t(12, 0.025) = 2.179
+
+          price    prediction    std. error        95% interval
+
+ 1        199.9        200.1        43.39        105.6 -    294.7
+ 2        228.0        226.3        42.23        134.3 -    318.3
+ 3        235.0        232.7        41.98        141.3 -    324.2
+ 4        285.0        271.2        40.87        182.1 -    360.2
+ 5        239.0        274.4        40.81        185.4 -    363.3
+ 6        293.0        295.2        40.51        206.9 -    383.4
+ 7        285.0        302.1        40.45        214.0 -    390.2
+ 8        365.0        311.8        40.40        223.8 -    399.8
+ 9        295.0        320.8        40.40        232.8 -    408.8
+10        290.0        322.6        40.40        234.6 -    410.7
+11        385.0        365.1        40.90        276.0 -    454.2
+12        505.0        413.1        42.41        320.7 -    505.5
+13        425.0        440.9        43.69        345.7 -    536.0
+14        415.0        468.6        45.25        370.0 -    567.2
+15                     399.2        41.87        308.0 -    490.5
+
+  Forecast evaluation statistics using 14 observations
+
+  Mean Error                        0
+  Root Mean Squared Error           36.128
+  Mean Absolute Error               26.109
+  Mean Percentage Error            -0.98627
+  Mean Absolute Percentage Error    7.3419
+  Theil's U1                        0.055116
+  Bias proportion, UM               0
+  Regression proportion, UR         0
+  Disturbance proportion, UD        1
+

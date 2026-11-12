@@ -1,0 +1,6 @@
+open data3-1.gdt
+summary price sqft
+ols price const sqft
+dataset addobs 1
+series sqft[15] = 2500
+fcast --static

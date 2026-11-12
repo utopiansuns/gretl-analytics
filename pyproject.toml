@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gretl-analytics"
+version = "1.0.0"
+description = "Интерпретация эконометрических результатов Gretl на русском языке и отчёт в Word"
+readme = "README.md"
+keywords = ["gretl", "econometrics", "эконометрика", "regression", "docx", "ГОСТ 7.32"]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "python-docx>=1.1",
+    "pymorphy3>=2.0",
+    "pywebview>=5.0; sys_platform != 'linux'",
+    "pywebview[qt]>=5.0; sys_platform == 'linux'",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Office/Business",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Natural Language :: Russian",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications :: Qt",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pyflakes>=3"]
+build = ["pyinstaller>=6", "pillow>=10"]
+
+[project.scripts]
+gretl-analytics = "gretl_analytics.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+gretl_analytics = ["ui/*.html", "ui/css/*.css", "ui/js/*.js", "core/gretl_vars.tsv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

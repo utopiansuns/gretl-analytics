@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Сборка
+build/
+dist/
+*.spec
+
+# Отчёты и личные материалы не коммитятся
+*.docx
+*.doc
+
+# Системные файлы
+.DS_Store
+Thumbs.db

@@ -1,0 +1,109 @@
+
+
+Correlation Coefficients, using the 14 observations 1 - 14
+Two-tailed critical values for n = 14: 5% 0.5324, 1% 0.6614
+
+         price          sqft        bedrms         baths
+        1.0000        0.9058        0.3156        0.6696  price
+                      1.0000        0.4647        0.7873  sqft
+                                    1.0000        0.5323  bedrms
+                                                  1.0000  baths
+
+
+Model 1: OLS, using observations 1-14
+Dependent variable: price
+
+             coefficient   std. error    t-ratio    p-value
+  ---------------------------------------------------------
+  const       39.0571      89.5397       0.4362     0.6758 
+  sqft         0.146551     0.0301014    4.869      0.0018  ***
+  bedrms      -7.04553     28.7363      -0.2452     0.8134 
+  baths       -0.263691    41.4547      -0.006361   0.9951 
+  pool        53.1958      22.0635       2.411      0.0467  **
+  famroom    -21.3447      42.8734      -0.4979     0.6338 
+  firepl      26.1880      53.8454       0.4864     0.6416 
+
+Mean dependent var   317.4929   S.D. dependent var   88.49816
+Sum squared resid    9010.244   S.E. of regression   35.87726
+R-squared            0.911504   Adjusted R-squared   0.835650
+F(6, 7)              12.01657   P-value(F)           0.002213
+Log-likelihood      -65.13456   Akaike criterion     144.2691
+Schwarz criterion    148.7425   Hannan-Quinn         143.8550
+
+Excluding the constant, p-value was highest for variable 4 (baths)
+
+
+Variance Inflation Factors
+Minimum possible value = 1.0
+Values > 10.0 may indicate a collinearity problem
+
+        sqft    3.055
+      bedrms    2.062
+       baths    3.457
+        pool    1.216
+     famroom    3.366
+      firepl    3.861
+
+VIF(j) = 1/(1 - R(j)^2), where R(j) is the multiple correlation coefficient
+between variable j and the other independent variables
+
+White's test for heteroskedasticity
+OLS, using observations 1-14
+Dependent variable: uhat^2
+Omitted due to exact collinearity: sq_bedrms
+
+               coefficient       std. error      t-ratio    p-value
+  -----------------------------------------------------------------
+  const      -19816.8          8790.34          -2.254      0.0739  *
+  sqft           -7.34817         3.48251       -2.110      0.0886  *
+  bedrms          3.62158       522.098          0.006937   0.9947 
+  baths       22884.7          7954.41           2.877      0.0347  **
+  pool          669.555         366.453          1.827      0.1272 
+  famroom       -29.0172        657.865         -0.04411    0.9665 
+  firepl         43.4744        931.095          0.04669    0.9646 
+  sq_sqft         0.00191626      0.000811590    2.361      0.0647  *
+  sq_baths    -4754.97         1645.18          -2.890      0.0342  **
+
+  Unadjusted R-squared = 0.783632
+
+Test statistic: TR^2 = 10.970841,
+with p-value = P(Chi-square(8) > 10.970841) = 0.203357
+
+Test on Model 1:
+
+  Null hypothesis: the regression parameters are zero for the variables
+    bedrms, baths, famroom, firepl
+  Test statistic: F(4, 7) = 0.0864517, p-value 0.983881
+  Omitting variables improved 3 of 3 information criteria.
+
+Model 2: OLS, using observations 1-14
+Dependent variable: price
+
+             coefficient   std. error   t-ratio   p-value 
+  --------------------------------------------------------
+  const       22.6728      29.5058       0.7684   0.4584  
+  sqft         0.144415     0.0141849   10.18     6.18e-07 ***
+  pool        52.7898      16.4817       3.203    0.0084   ***
+
+Mean dependent var   317.4929   S.D. dependent var   88.49816
+Sum squared resid    9455.359   S.E. of regression   29.31856
+R-squared            0.907132   Adjusted R-squared   0.890247
+F(2, 11)             53.72383   P-value(F)           2.11e-06
+Log-likelihood      -65.47210   Akaike criterion     136.9442
+Schwarz criterion    138.8614   Hannan-Quinn         136.7667
+
+
+Frequency distribution for uhat2, obs 1-14
+number of bins = 5, mean = 1.6241e-14, sd = 29.3186
+
+       interval          midpt   frequency    rel.     cum.
+
+           < -29.045   -40.918        2     14.29%   14.29% *****
+   -29.045 - -5.3015   -17.173        5     35.71%   50.00% ************
+   -5.3015 -  18.443    6.5706        3     21.43%   71.43% *******
+    18.443 -  42.187    30.315        3     21.43%   92.86% *******
+          >=  42.187    54.059        1      7.14%  100.00% **
+
+Test for null hypothesis of normal distribution:
+Chi-square(2) = 0.646 with p-value 0.72392
+

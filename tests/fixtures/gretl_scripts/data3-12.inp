@@ -1,0 +1,4 @@
+open data3-12.gdt
+ols pop const year
+chow 1973
+modtest --autocorr 1
