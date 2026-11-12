@@ -6,6 +6,9 @@ App.report = {
   /** Абзацы раздела в выбранном режиме. @param {any} s @returns {string[]} */
   paras: (s) => (App.state.brief ? s.brief : s.full) || [],
 
+  /** Абзацы для копирования и Word: без пустых, оставшихся после правки. @param {any} s */
+  filled(s) { return this.paras(s).filter((p) => p.trim()); },
+
   /** @param {any} x */
   isNum: (x) => /^[-−+<>]?\s*\d[\d\s.,e+−-]*%?\s*\**$/.test(String(x).trim()) || x === "-" || /^\*+$/.test(String(x)),
 
@@ -19,14 +22,16 @@ App.report = {
     return cap;
   },
 
-  /** @param {any} t @param {string} title @param {number} n */
-  table(t, title, n) {
+  /** @param {any} t @param {string} title @param {number} n @param {number} si @param {number} ti */
+  table(t, title, n, si, ti) {
     const el = App.el, rows = t.rows.slice(0, 120);
+    /** @param {string} r @param {number} c */
+    const ed = (r, c) => ({ "data-ed": "cell", "data-sec": si, "data-t": ti, "data-r": r, "data-c": c, contenteditable: "plaintext-only" });
     const ncol = Math.max(...[t.header || [], ...rows].map((/** @type {any[]} */ r) => r.length));
     const num = [...Array(ncol)].map((_, j) => t.header ? j > 0 && rows.every((/** @type {any[]} */ r) => !r[j] || this.isNum(r[j])) : j % 2 === 1);
     const table = el("table", { class: t.header ? "" : "plain" },
-      t.header ? el("thead", {}, el("tr", {}, t.header.map((/** @type {string} */ x, /** @type {number} */ j) => el("th", { class: num[j] ? "n" : "" }, x)))) : null,
-      el("tbody", {}, rows.map((/** @type {any[]} */ r) => el("tr", {}, [...Array(ncol)].map((_, j) => el("td", { class: num[j] ? "n" : "" }, r[j] ?? ""))))));
+      t.header ? el("thead", {}, el("tr", {}, t.header.map((/** @type {string} */ x, /** @type {number} */ j) => el("th", { class: num[j] ? "n" : "", ...ed("h", j) }, x)))) : null,
+      el("tbody", {}, rows.map((/** @type {any[]} */ r, /** @type {number} */ i) => el("tr", {}, [...Array(ncol)].map((_, j) => el("td", { class: num[j] ? "n" : "", ...ed(String(i), j) }, r[j] ?? ""))))));
     return el("div", { class: "tbl" }, el("p", { class: "cap" }, `Таблица ${n} – ${this.caption(t, title) || title}`), table,
       t.rows.length > rows.length ? el("p", { class: "more" }, `Ещё ${t.rows.length - rows.length} строк в отчёте Word.`) : null);
   },
@@ -34,10 +39,7 @@ App.report = {
   /** Абзац с учётом его роли: вывод, расчётный блок, проверка коэффициента. @param {string} p */
   paragraph(p) {
     const el = App.el;
-    if (p.includes("\n")) {
-      const [head, ...rest] = p.split("\n");
-      return el("div", { class: "calc" }, el("b", {}, head), rest.join("\n"));
-    }
+    if (p.includes("\n")) return el("div", { class: "calc" }, p);
     const m = p.match(/^(Вывод(?: по модели)?:)\s*([\s\S]*)$/);
     if (m) return el("p", { class: "concl" }, el("b", {}, m[1]), " " + m[2]);
     const c = p.match(/^([^:]{1,60}): (\|t\| = |z = )([\s\S]*)$/);
@@ -62,7 +64,7 @@ App.report = {
     }
     // абзацы по ГОСТ 7.32: отступ 1,25 см, полуторный интервал, по ширине; «Вывод:» полужирным
     const ps = "margin:0;text-indent:1.25cm;line-height:150%;text-align:justify";
-    for (const p of this.paras(s)) {
+    for (const p of this.filled(s)) {
       const body = esc(p).replace(/\n/g, "<br>").replace(/^(Вывод(?: по модели)?:)/, "<b>$1</b>");
       h += `<p style="${ps}">${body}</p>`;
     }
@@ -78,7 +80,7 @@ App.report = {
       if (t.header) out.push(t.header.join("\t"));
       for (const r of t.rows) out.push(r.join("\t"));
     }
-    return out.concat(this.paras(s)).join("\n");
+    return out.concat(this.filled(s)).join("\n");
   },
 
   /** @param {string} text @param {string} html */
@@ -107,7 +109,8 @@ App.report = {
     const btn = el("button", { class: "sec-copy", "aria-haspopup": "menu", "aria-expanded": "false" }, "Копировать");
     const node = el("section", { class: "doc-section", id: "sec-" + i },
       el("h2", { class: final ? "structural" : "" }, final ? null : el("span", { class: "num" }, String(i + 1)),
-        el("span", { class: "t" }, final ? "Заключение" : s.title), btn));
+        final ? el("span", { class: "t" }, "Заключение")
+          : el("span", { class: "t", "data-ed": "title", "data-sec": i, contenteditable: "plaintext-only" }, s.title), btn));
     btn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       const open = btn.getAttribute("aria-expanded") === "true";
@@ -115,10 +118,10 @@ App.report = {
       if (open) return;
       btn.setAttribute("aria-expanded", "true");
       node.append(el("div", { class: "sec-menu", role: "menu" },
-        el("button", { role: "menuitem", onclick: () => { this.closeMenus(); this.copy(this.paras(s).join("\n"), this.html(s, false)); } }, "Скопировать текст"),
+        el("button", { role: "menuitem", onclick: () => { this.closeMenus(); this.copy(this.filled(s).join("\n"), this.html(s, false)); } }, "Скопировать текст"),
         el("button", { role: "menuitem", onclick: () => { this.closeMenus(); this.copy(this.text(s, true), this.html(s, true)); } }, "Скопировать с таблицами")));
     });
-    for (const t of s.tables || []) node.append(this.table(t, s.title, ++this.nTable));
+    (s.tables || []).forEach((/** @type {any} */ t, /** @type {number} */ ti) => node.append(this.table(t, s.title, ++this.nTable, i, ti)));
     if (s.equation && !App.state.brief) {
       node.append(el("div", { class: "eq" },
         el("div", { class: "main" }, s.equation.text.replace(/^\^(\S+)/, "$1").replace(/\*/g, "·"),
@@ -126,7 +129,12 @@ App.report = {
         el("div", { class: "se" }, s.equation.se),
         el("div", { class: "cap" }, "в скобках указаны стандартные ошибки")));
     }
-    for (const p of this.paras(s)) node.append(this.paragraph(p));
+    this.paras(s).forEach((p, k) => {
+      const e = this.paragraph(p);
+      Object.assign(e.dataset, { ed: "p", sec: String(i), p: String(k) });
+      e.setAttribute("contenteditable", "plaintext-only");
+      node.append(e);
+    });
     if (s.note) node.append(el("p", { class: "note" }, "Примечание – " + s.note));   // ГОСТ: после материала
     return node;
   },
@@ -140,13 +148,14 @@ App.report = {
     if (!r) return;
     const paper = App.$("paper");
     const today = new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
-    const kids = [el("h1", { class: "doc-title" }, S.title || "Эконометрический анализ"),
+    const kids = [el("h1", { class: "doc-title", "data-ed": "doctitle", contenteditable: "plaintext-only" }, S.title || "Эконометрический анализ"),
                   el("p", { class: "doc-sub" }, `Аналитический отчёт по результатам расчётов в Gretl, ${today}`)];
     for (const w of r.warnings || []) kids.push(el("p", { class: "doc-warn" }, w));
     if (S.findings.length) {
       kids.push(el("section", { class: "findings", "aria-label": "Основные выводы" }, el("h2", { class: "structural" }, "Основные выводы"),
         el("p", {}, "По результатам анализа получены следующие основные выводы:"),
-        S.findings.map((f) => el("p", { class: "dash" }, "– ", f.label ? el("b", {}, f.label + ". ") : null, f.text))));
+        S.findings.map((f, k) => el("p", { class: "dash" }, "– ", f.label ? el("b", {}, f.label + ". ") : null,
+          el("span", { "data-ed": "finding", "data-f": k, contenteditable: "plaintext-only" }, f.text)))));
     }
     this.nTable = this.nFormula = 0;
     r.sections.forEach((/** @type {any} */ s, /** @type {number} */ i) => kids.push(this.section(s, i)));

@@ -10,10 +10,10 @@ window.App = window.App || {};
  * @type {{text: string, glossary: {var: string, ru: string, unit: string}[],
  *         memory: Object<string, {ru: string, unit: string}>, title: string, brief: boolean,
  *         theme: string, result: any, findings: {label: string, text: string}[],
- *         forms: Object<string, Object<string, string>>, morphology: boolean}}
+ *         forms: Object<string, Object<string, string>>, morphology: boolean, edited: boolean, original: any}}
  */
 App.state = { text: "", glossary: [], memory: {}, title: "Эконометрический анализ", brief: false, theme: "auto",
-  result: null, findings: [], forms: {}, morphology: true };
+  result: null, findings: [], forms: {}, morphology: true, edited: false, original: null };
 
 /** @param {string} id @returns {any} */
 App.$ = (id) => document.getElementById(id);
@@ -59,4 +59,47 @@ App.toast = (msg) => {
   t.classList.add("show");
   clearTimeout(App.toast.timer);
   App.toast.timer = setTimeout(() => t.classList.remove("show"), 1800);
+};
+
+/** Ширина левой панели: перетаскивание края мышью или стрелками, двойной щелчок – исходная ширина. */
+App.sidebar = {
+  MIN: 260,
+  /** @type {number|null} */ width: null,
+
+  /** @param {number|null|undefined} w */
+  set(w) {
+    const root = document.documentElement.style;
+    if (!w) { this.width = null; root.removeProperty("--sidebar-width"); return; }
+    const max = Math.max(this.MIN, Math.min(760, window.innerWidth - 900));   // листу и кнопкам остаётся место
+    this.width = Math.round(Math.min(max, Math.max(this.MIN, w)));
+    root.setProperty("--sidebar-width", this.width + "px");
+  },
+
+  save() { App.call("save_state", { sidebar: this.width }).catch(() => {}); },
+
+  init() {
+    const h = App.$("resizer");
+    h.addEventListener("pointerdown", (/** @type {PointerEvent} */ e) => {
+      e.preventDefault();
+      h.setPointerCapture(e.pointerId);
+      document.body.classList.add("resizing");
+      const move = (/** @type {PointerEvent} */ ev) => this.set(ev.clientX);
+      const up = () => {
+        h.removeEventListener("pointermove", move);
+        document.body.classList.remove("resizing");
+        this.save();
+      };
+      h.addEventListener("pointermove", move);
+      h.addEventListener("pointerup", up, { once: true });
+    });
+    h.addEventListener("dblclick", () => { this.set(null); this.save(); });
+    h.addEventListener("keydown", (/** @type {KeyboardEvent} */ e) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      const now = App.$("sidebar").getBoundingClientRect().width + 8;
+      this.set(now + (e.key === "ArrowRight" ? 20 : -20));
+      this.save();
+    });
+    window.addEventListener("resize", () => { if (this.width) this.set(this.width); });
+  },
 };

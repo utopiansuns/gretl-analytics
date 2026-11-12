@@ -115,10 +115,16 @@ class Api:
         return {"copied": clipboard.write(text or "", html)}
 
     @_safe
-    def export_word(self, mode="full", title=None, path=None):
-        """Сохраняет отчёт: path задаётся в тестах, в приложении открывается диалог сохранения."""
+    def export_word(self, mode="full", title=None, path=None, edited=None):
+        """Сохраняет отчёт: path задаётся в тестах, в приложении открывается диалог сохранения.
+
+        edited – правки с листа: {"sections": [...], "findings": [{"label", "text"}]}."""
         if not self._result:
             raise RuntimeError("Сначала сформируйте аналитику.")
+        result, findings = dict(self._result, title=title or self._result.get("title")), None
+        if edited and isinstance(edited.get("sections"), list):
+            result["sections"] = edited["sections"]
+            findings = [(f.get("label") or "", f.get("text") or "") for f in edited.get("findings") or []]
         mode = "brief" if mode == "brief" else "full"
         name = re.sub(r'[\\/:*?"<>|]+', "_", (title or "Отчёт").strip()) or "Отчёт"
         name += " (кратко).docx" if mode == "brief" else ".docx"
@@ -131,8 +137,8 @@ class Api:
             path = chosen if isinstance(chosen, str) else chosen[0]
             if not path.lower().endswith(".docx"):
                 path += ".docx"
-            to_docx(dict(self._result, title=title or self._result.get("title")), path, mode=mode)
+            to_docx(result, path, mode=mode, findings=findings)
             open_file(path)
         else:
-            to_docx(dict(self._result, title=title or self._result.get("title")), path, mode=mode)
+            to_docx(result, path, mode=mode, findings=findings)
         return {"path": path}

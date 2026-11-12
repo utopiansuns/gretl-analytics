@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gretl-analytics"
-version = "1.0.0"
+version = "1.1.0"
 description = "Интерпретация эконометрических результатов Gretl на русском языке и отчёт в Word"
 readme = "README.md"
 keywords = ["gretl", "econometrics", "эконометрика", "regression", "docx", "ГОСТ 7.32"]

@@ -8,7 +8,8 @@ import time
 
 FOLDER = "GretlAnalytics"
 MAX_RUNS = 20
-DEFAULTS = {"text": "", "glossary": [], "memory": {}, "title": "Эконометрический анализ", "brief": False, "theme": "auto"}
+DEFAULTS = {"text": "", "glossary": [], "memory": {}, "title": "Эконометрический анализ", "brief": False, "theme": "auto",
+            "sidebar": None}
 
 
 def data_dir():

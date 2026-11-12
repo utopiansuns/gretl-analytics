@@ -286,6 +286,7 @@ class Report:
 
     def key_findings(self, items):
         """«ОСНОВНЫЕ ВЫВОДЫ»: перечисление через тире с абзацного отступа."""
+        items = [(label, text) for label, text in items if text.strip()]
         if not items:
             return
         self.structural("Основные выводы")
@@ -322,8 +323,10 @@ def key_findings(result):
     return items[:10]
 
 
-def to_docx(result, path, mode="full", section_ids=None):
-    """Сохраняет отчёт. mode: full (подробно) или brief (только выводы и таблицы)."""
+def to_docx(result, path, mode="full", section_ids=None, findings=None):
+    """Сохраняет отчёт. mode: full (подробно) или brief (только выводы и таблицы).
+
+    findings – «Основные выводы», исправленные пользователем; без них список собирается заново."""
     r = Report()
     today = datetime.date.today()
     r.para(result.get("title") or "Эконометрический анализ", size=18, align="center", indent=False,
@@ -334,7 +337,7 @@ def to_docx(result, path, mode="full", section_ids=None):
            spacing=1.15, after=14)
 
     sections = [s for s in result["sections"] if not section_ids or s["id"] in section_ids]
-    r.key_findings(key_findings({"sections": sections}))
+    r.key_findings(findings if findings is not None else key_findings({"sections": sections}))
 
     n = 0
     for s in sections:
@@ -348,7 +351,8 @@ def to_docx(result, path, mode="full", section_ids=None):
         if s.get("equation") and mode == "full":
             r.equation(s["equation"])
         for p in s.get(mode) or []:
-            r.text(p)
+            if p.strip():          # пустые абзацы остаются после правки на листе
+                r.text(p)
         if s.get("note"):   # примечание идёт после материала, к которому относится
             r.note(s["note"])
 

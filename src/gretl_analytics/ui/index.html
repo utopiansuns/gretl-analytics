@@ -9,8 +9,10 @@
 </head>
 <body>
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-head pywebview-drag-region"></div>
+  <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Ширина панели" tabindex="0"
+    title="Потяните, чтобы изменить ширину панели. Двойной щелчок – исходная ширина"></div>
 
   <div class="segmented segmented-wide" role="tablist" aria-label="Панель">
     <button role="tab" id="tab-input" aria-selected="true" aria-controls="panel-input">Вывод Gretl</button>
@@ -31,14 +33,23 @@
   </section>
 
   <section class="panel" id="panel-glossary" role="tabpanel" aria-labelledby="tab-glossary" hidden>
-    <p class="caption">Переменные из вставки появляются здесь сами, названия и единицы подбираются по словарю наборов Gretl. Исправьте, если нужно: пишите в именительном падеже, остальные падежи подставятся сами.</p>
+    <p class="caption">Переменные из вставки появляются здесь сами, названия и единицы подбираются по словарю наборов Gretl. Название пишите в именительном падеже: падежи подставятся сами. Единицы выберите из списка или впишите свои.</p>
     <div class="row">
       <span class="spacer"></span>
       <button class="pill pill-plain" id="add-row">Добавить</button>
     </div>
     <div class="glossary" id="glossary"></div>
     <p class="caption" id="gl-note" aria-live="polite"></p>
-    <p class="caption">Для фиктивной переменной напишите в единицах 0/1, и текст будет звучать как «при наличии бассейна… чем при отсутствии».</p>
+    <datalist id="units">
+      <option value="0/1" label="признак «да/нет»: бассейн, пол, город"></option>
+      <option value="%"></option><option value="ед."></option><option value="шт."></option><option value="чел."></option>
+      <option value="тыс. чел."></option><option value="лет"></option><option value="мес."></option><option value="дней"></option>
+      <option value="ч"></option><option value="баллов"></option>
+      <option value="руб."></option><option value="тыс. руб."></option><option value="млн руб."></option><option value="млрд руб."></option>
+      <option value="долл."></option><option value="тыс. долл."></option><option value="млн долл."></option><option value="млрд долл."></option>
+      <option value="евро"></option><option value="тыс. евро"></option><option value="млн евро"></option>
+      <option value="кв. м"></option><option value="кв. футов"></option><option value="кг"></option><option value="т"></option>
+    </datalist>
   </section>
 
   <footer class="sidebar-foot">
@@ -59,6 +70,7 @@
       <button role="radio" id="mode-full" aria-checked="true">Подробно</button>
       <button role="radio" id="mode-brief" aria-checked="false">Кратко</button>
     </div>
+    <button class="pill pill-plain" id="reset-edits" hidden title="Вернуть текст, который сформировало приложение">Отменить правки</button>
     <div class="pill-group" id="doc-actions" hidden>
       <button id="copy-all" title="Скопировать отчёт с оформлением">Копировать</button>
       <button id="save-word" title="Сохранить отчёт в Word и открыть">Сохранить в Word</button>
@@ -89,6 +101,7 @@
 <script src="js/theme.js"></script>
 <script src="js/glossary.js"></script>
 <script src="js/report.js"></script>
+<script src="js/editor.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

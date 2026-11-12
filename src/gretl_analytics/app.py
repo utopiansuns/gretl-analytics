@@ -63,11 +63,30 @@ def _startup(window, api):
         _selftest(window, api, sample)
 
 
+_EDIT_TEXT = "Первая часть. Вторая часть."
+_EDIT_JS = """(function () {
+  const el = document.querySelector('[data-ed="p"]:not(.calc)');
+  const si = +el.dataset.sec, k = +el.dataset.p, n = App.editor.paras(si).length;
+  el.focus(); el.textContent = "%s"; el.dispatchEvent(new Event("input", {bubbles: true}));
+  const put = (node, at) => { const r = document.createRange(); r.setStart(node, at); r.collapse(true);
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  put(el.firstChild, 14);
+  el.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+  const split = App.editor.paras(si).length === n + 1 && App.editor.paras(si)[k + 1] === "Вторая часть.";
+  const el2 = document.querySelector('[data-ed="p"][data-sec="' + si + '"][data-p="' + (k + 1) + '"]');
+  put(el2.firstChild, 0);
+  el2.dispatchEvent(new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true}));
+  const merged = App.editor.paras(si).length === n && App.editor.paras(si)[k] === "%s";
+  return JSON.stringify({split: split, merged: merged, edited: App.state.edited});
+})()""" % (_EDIT_TEXT, _EDIT_TEXT)
+
+
 def _selftest(window, api, sample):
     """GRETL_ANALYTICS_SELFTEST=<файл>: вставить текст через интерфейс, построить отчёт и закрыться.
 
-    Код выхода 0 означает, что окно, мост JS и Python, ядро, оглавление, словарь (заполняется по тексту
-    и очищается вместе с ним) и сохранение в Word работают в этой сборке.
+    Код выхода 0 означает, что окно, мост JS и Python, ядро, оглавление, правка на листе (Enter делит абзац,
+    Backspace соединяет), ширина панели, словарь (заполняется по тексту и очищается вместе с ним)
+    и сохранение правок в Word работают в этой сборке.
     GRETL_ANALYTICS_SELFTEST_SHOT=<файл.png> дополнительно сохраняет снимок окна (macOS).
     """
     with open(sample, encoding="utf-8") as f:
@@ -93,13 +112,28 @@ def _selftest(window, api, sample):
         outline = {"click": after_click, "end": at_end, "last": str(int(n) - 1)}
         ok = after_click == "2" and at_end == outline["last"]
         window.evaluate_js("document.getElementById('desk').scrollTop=0")
+    editing = None
+    if ok:   # правка на листе: Enter делит абзац по курсору, Backspace в начале соединяет обратно
+        editing = json.loads(window.evaluate_js(_EDIT_JS) or "{}")
+        editing["sidebar"] = window.evaluate_js(
+            "App.sidebar.set(440); Math.round(document.getElementById('sidebar').getBoundingClientRect().width)")
+        # панель расширилась, а кнопка «Сформировать» осталась видна целиком
+        editing["run_visible"] = window.evaluate_js(
+            "document.getElementById('run').getBoundingClientRect().right <= window.innerWidth")
+        ok = (editing.get("split") and editing.get("merged") and int(editing["sidebar"] or 0) > 400
+              and editing["run_visible"] is True)
     word = None
     if ok:   # отчёт Word: в сборке нужны шаблоны python-docx, их отсутствие ловится только здесь
         import tempfile
         try:
             with tempfile.TemporaryDirectory() as tmp:
-                out = api.export_word("full", None, os.path.join(tmp, "selftest.docx"))
+                edits = json.loads(window.evaluate_js(
+                    "JSON.stringify({sections: App.state.result.sections, findings: App.state.findings})"))
+                out = api.export_word("full", None, os.path.join(tmp, "selftest.docx"), edits)
                 word = out.get("error") or (bool(out.get("path")) and os.path.getsize(out["path"]) > 0)
+                if word is True:
+                    import docx
+                    word = any(p.text == _EDIT_TEXT for p in docx.Document(out["path"]).paragraphs) or "правка не попала в Word"
         except Exception as e:
             word = repr(e)
         ok = word is True
@@ -119,7 +153,8 @@ def _selftest(window, api, sample):
     log = os.environ.get("GRETL_ANALYTICS_SELFTEST_LOG")
     if log:
         with open(log, "w", encoding="utf-8") as f:
-            json.dump({"ok": ok, "sections": n, "outline": outline, "glossary": glossary, "word": word}, f, ensure_ascii=False)
+            json.dump({"ok": ok, "sections": n, "outline": outline, "editing": editing, "glossary": glossary,
+                       "word": word}, f, ensure_ascii=False)
     window.destroy()
     os._exit(0 if ok else 3)
 

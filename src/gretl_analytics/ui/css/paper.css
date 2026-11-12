@@ -68,7 +68,7 @@
 .paper .note { font-size: 14px; text-indent: 1.25em; }
 .paper .concl { margin: 12px 0; text-indent: 1.25em; }
 .paper .calc { margin: 12px 0; padding-left: 14px; font-size: 14.5px; line-height: 1.5; white-space: pre-line; }
-.paper .calc b { display: block; margin-bottom: 2px; }
+.paper .calc::first-line { font-weight: 700; }
 .paper .check { margin: 0 0 4px; font-size: 14.5px; text-align: left; }
 .paper .check i { color: var(--p-muted); }
 
@@ -82,7 +82,7 @@
 .tbl .more { margin-top: 6px; font: 12px -apple-system, "Segoe UI", sans-serif; color: var(--p-faint); }
 
 .eq { margin: 16px 0; text-align: center; }
-.eq .main { position: relative; font-size: 16.5px; font-style: italic; }
+.eq .main { position: relative; padding: 0 3.2em; font-size: 16.5px; font-style: italic; }   /* место под номер формулы */
 .eq .no { position: absolute; right: 0; font-style: normal; }
 .eq .se { font-size: 14px; color: var(--p-muted); }
 .eq .cap { font-size: 13px; font-style: italic; color: var(--p-faint); }
@@ -99,3 +99,10 @@
 @media (max-width: 1100px) { .paper { padding: 40px 38px 48px; } }
 .tbl th.n { text-align: center; }
 .doc-section h2.structural .sec-copy { position: absolute; right: 0; }
+
+/* правка на листе: подсветка при наведении и курсоре, как поле в Word */
+.paper [contenteditable] { border-radius: 3px; caret-color: var(--p-accent); transition: box-shadow .12s; }
+.paper [contenteditable]:hover { box-shadow: 0 0 0 3px rgba(120, 140, 170, .12); }
+.paper [contenteditable]:focus { outline: none; box-shadow: 0 0 0 3px rgba(75, 144, 255, .22); }
+.paper [data-ed="p"]:empty::before { content: "Пустой абзац: введите текст или удалите его клавишей ⌫"; color: var(--p-faint); font-style: italic; }
+.tbl td[contenteditable]:focus, .tbl th[contenteditable]:focus { box-shadow: inset 0 0 0 2px rgba(75, 144, 255, .45); }

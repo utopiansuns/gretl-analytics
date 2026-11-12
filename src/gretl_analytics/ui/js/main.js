@@ -45,6 +45,7 @@
 
   async function run() {
     if (!S.text.trim()) { App.status("Вставьте вывод Gretl в панель слева.", true); showTab("input"); $("text").focus(); return; }
+    if (S.edited && !window.confirm("Сформировать отчёт заново? Правки, сделанные на листе, пропадут.")) return;
     const b = $("run");
     b.disabled = true;
     App.status("Формирую аналитику…");
@@ -53,9 +54,11 @@
       const r = await App.call("analyze", S.text, S.glossary, S.title);
       S.result = r.result;
       S.findings = r.findings || [];
+      App.editor.snapshot();
       App.report.render(true);
       $("desk").scrollTop = 0;
-      App.status(r.result.warnings.length ? "Готово, есть замечания: они в начале отчёта." : "Готово. Отчёт можно копировать или сохранить в Word.");
+      App.status(r.result.warnings.length ? "Готово, есть замечания: они в начале отчёта."
+        : "Готово. Текст можно править прямо на листе, правки попадут в Word и при копировании.");
     } catch (e) { App.status(/** @type {Error} */ (e).message, true); }
     finally { b.disabled = false; }
   }
@@ -64,7 +67,8 @@
     if (!S.result) return;
     App.status("Сохраняю отчёт…");
     try {
-      const r = await App.call("export_word", S.brief ? "brief" : "full", S.title);
+      const r = await App.call("export_word", S.brief ? "brief" : "full", S.title, null,
+        { sections: S.result.sections, findings: S.findings });
       App.status(r.cancelled ? "Сохранение отменено." : "Отчёт сохранён и открыт.");
     } catch (e) { App.status(/** @type {Error} */ (e).message, true); }
   }
@@ -82,7 +86,13 @@
   $("tab-glossary").onclick = () => showTab("glossary");
   $("mode-full").onclick = () => setMode(false);
   $("mode-brief").onclick = () => setMode(true);
-  $("title").oninput = (/** @type {Event} */ e) => { S.title = /** @type {HTMLInputElement} */ (e.target).value; App.persist(); };
+  $("title").oninput = (/** @type {Event} */ e) => {
+    S.title = /** @type {HTMLInputElement} */ (e.target).value;
+    const h = document.querySelector(".doc-title");
+    if (h) h.textContent = S.title || "Эконометрический анализ";
+    App.persist();
+  };
+  $("reset-edits").onclick = () => App.editor.reset();
   $("text").oninput = (/** @type {Event} */ e) => { S.text = /** @type {HTMLTextAreaElement} */ (e.target).value; App.persist(); detect(); App.glossary.sync(); };
   $("paste").onclick = () => paste(false);
   $("append").onclick = () => paste(true);
@@ -103,12 +113,15 @@
 
   (async function init() {
     App.theme.init();
+    App.editor.init();
+    App.sidebar.init();
     try {
       const p = await App.call("platform");
       document.documentElement.classList.toggle("native-glass", !!p.glass);
     } catch (e) { /* обычное окно */ }
     try {
       const st = await App.call("load_state");
+      App.sidebar.set(st.sidebar);
       Object.assign(S, { text: st.text || "", glossary: st.glossary || [], memory: st.memory || {}, title: st.title || S.title,
         brief: !!st.brief, theme: st.theme || "auto" });
     } catch (e) { /* первое открытие */ }
