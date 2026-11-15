@@ -46,13 +46,19 @@ jobs:
           Get-ChildItem smoke -Recurse -File | ForEach-Object {
             Set-Content -LiteralPath $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
           }
-          $exe = "smoke\GretlAnalytics\GretlAnalytics.exe"
+          $exe = (Resolve-Path "smoke\GretlAnalytics\GretlAnalytics.exe").Path
+          # Запуск напрямую (UseShellExecute = false): иначе Windows покажет окно «Издатель не может быть
+          # проверен» для помеченного файла, и на сервере без пользователя проверка зависнет.
           function Check($label, $env_extra) {
-            $env:GRETL_ANALYTICS_CHECK = "$PWD\check.json"
-            foreach ($k in $env_extra.Keys) { Set-Item "env:$k" $env_extra[$k] }
-            $p = Start-Process $exe -Wait -PassThru
-            foreach ($k in $env_extra.Keys) { Remove-Item "env:$k" }
-            Write-Host "$label (код $($p.ExitCode)): $(Get-Content check.json -Raw)"
+            Remove-Item check.json -ErrorAction SilentlyContinue
+            $si = New-Object System.Diagnostics.ProcessStartInfo $exe
+            $si.UseShellExecute = $false
+            $si.EnvironmentVariables["GRETL_ANALYTICS_CHECK"] = "$PWD\check.json"
+            foreach ($k in $env_extra.Keys) { $si.EnvironmentVariables[$k] = $env_extra[$k] }
+            $p = [System.Diagnostics.Process]::Start($si)
+            if (-not $p.WaitForExit(120000)) { $p.Kill($true); Write-Host "${label}: нет ответа за 2 минуты"; return 99 }
+            $out = if (Test-Path check.json) { Get-Content check.json -Raw } else { "файл результата не создан" }
+            Write-Host "$label (код $($p.ExitCode)): $out"
             return $p.ExitCode
           }
           Check "Без снятия пометки" @{ GRETL_ANALYTICS_NO_UNBLOCK = "1" } | Out-Null
