@@ -36,6 +36,27 @@ jobs:
         run: python packaging/build.py
         env:
           PYTHONIOENCODING: utf-8
+      # Как у пользователя: архив скачан из Интернета, и Windows пометила каждый файл (Zone.Identifier).
+      # Сначала без снятия пометки (воспроизводит ошибку, на релиз не влияет), затем как в приложении.
+      - name: Проверка запуска после скачивания (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Expand-Archive (Get-Item dist\*.zip).FullName -DestinationPath smoke
+          Get-ChildItem smoke -Recurse -File | ForEach-Object {
+            Set-Content -LiteralPath $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
+          }
+          $exe = "smoke\GretlAnalytics\GretlAnalytics.exe"
+          function Check($label, $env_extra) {
+            $env:GRETL_ANALYTICS_CHECK = "$PWD\check.json"
+            foreach ($k in $env_extra.Keys) { Set-Item "env:$k" $env_extra[$k] }
+            $p = Start-Process $exe -Wait -PassThru
+            foreach ($k in $env_extra.Keys) { Remove-Item "env:$k" }
+            Write-Host "$label (код $($p.ExitCode)): $(Get-Content check.json -Raw)"
+            return $p.ExitCode
+          }
+          Check "Без снятия пометки" @{ GRETL_ANALYTICS_NO_UNBLOCK = "1" } | Out-Null
+          if ((Check "Как в приложении" @{}) -ne 0) { Write-Error "Окно не загрузится у пользователя"; exit 1 }
       - uses: actions/upload-artifact@v4
         with:
           name: gretl-analytics-${{ matrix.os }}

@@ -72,7 +72,7 @@ Windows, macOS, Linux. Всё считается на вашем компьют�
 | Windows 10, 11 | `…-Windows-x64.zip` | Распакуйте и запустите `GretlAnalytics.exe`. Если SmartScreen предупредит: «Подробнее» → «Выполнить в любом случае» |
 | Linux | `…-Linux-x64.tar.gz` | Распакуйте и запустите `GretlAnalytics/GretlAnalytics` |
 
-В Windows нужен Microsoft Edge WebView2: он уже есть в Windows 11 и в обновлённой Windows 10.
+В Windows нужны Microsoft Edge WebView2 и .NET Framework 4.8: они уже есть в Windows 11 и в обновлённой Windows 10. Если окно не открывается и приложение сообщает о заблокированных файлах, удалите распакованную папку, откройте свойства скачанного архива, отметьте «Разблокировать» и распакуйте заново.
 
 ### Из исходников
 
